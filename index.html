@@ -187,42 +187,43 @@
        * Tableauダッシュボードのサイズをブラウザ幅に合わせて動的に調整する関数
        */
       function resizeTableau() {
-        // 親コンテナの幅を取得（パディング分を差し引く）
+        // 親コンテナの幅を取得
         var containerWidth =
           document.querySelector(".viz-card").offsetWidth - 20;
         var vizContainer = document.getElementById("vizContainer");
         var divElement = document.getElementById("viz1770204389511");
         var vizElement = divElement.getElementsByTagName("object")[0];
 
-        // テンプレートのオリジナルサイズ（1400x1627）
+        // テンプレートのオリジナルサイズ
         var originalWidth = 1400;
         var originalHeight = 1627;
 
-        // 現在の幅に基づいたスケーリング比率を計算
+        // スケーリング比率を計算（コンテナ幅に合わせて縮小）
         var scale = containerWidth / originalWidth;
-
-        // 1倍（等倍）を超えないように制限（拡大によるボケ防止）
         if (scale > 1) scale = 1;
 
-        // CSS Transformを使用してダッシュボード全体を等倍スケーリング
+        // CSS Transformで全体をスケーリング
         vizContainer.style.transform = "scale(" + scale + ")";
 
-        // スケーリング後の高さを計算し、親要素の高さに反映（下部の空白を削除）
+        // 親容器の高さを動的に調整（余白削除）
         document.querySelector(".viz-card").style.height =
           originalHeight * scale + 40 + "px";
 
-        // Tableauオブジェクト自体のピクセルサイズを固定値として設定
-        vizElement.style.width = originalWidth + "px";
+        // ★ここを修正：Tableau側の幅を固定値ではなく100%に設定★
+        vizElement.style.width = "100%";
         vizElement.style.height = originalHeight + "px";
       }
 
-      // 初回ロード時およびウィンドウのリサイズ時に実行
-      window.onload = resizeTableau;
+      // ウィンドウのリサイズ時に再計算
       window.onresize = resizeTableau;
 
-      // Tableauライブラリの読み込み
+      // Tableauライブラリの読み込みと初期化
       var divElement = document.getElementById("viz1770204389511");
       var vizElement = divElement.getElementsByTagName("object")[0];
+
+      // 初期化時にもサイズ調整を実行
+      resizeTableau();
+
       var scriptElement = document.createElement("script");
       scriptElement.src =
         "https://public.tableau.com/javascripts/api/viz_v1.js";
