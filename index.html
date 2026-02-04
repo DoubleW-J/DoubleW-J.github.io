@@ -148,14 +148,10 @@
     </footer>
 
     <script type="text/javascript">
-      // ダッシュボードの元サイズ定義
-      // ※ 追加グラフと拡張機能（Viz Extensions）の描画領域を考慮し、高さを2150pxに調整
+      // ダッシュボードの元サイズ（実際のコンテンツ量に合わせて調整）
       var originalWidth = 1400;
-      var originalHeight = 2150;
+      var originalHeight = 1850;
 
-      /**
-       * 画面幅に応じたスケーリングおよび配置の補正処理
-       */
       function resizeTableau() {
         var card = document.getElementById("cardParent");
         var container = document.getElementById("vizContainer");
@@ -164,26 +160,22 @@
 
         if (!card || !container || !vizObj) return;
 
-        // 親コンテナの幅を取得し、スケール比率を算出（最大1.0）
         var availableWidth = card.offsetWidth;
         var scale = availableWidth / originalWidth;
         if (scale > 1) scale = 1;
 
-        // CSS Transformによるスケーリング適用
+        // スケーリングと配置の適用
         container.style.transform = "scale(" + scale + ")";
-
-        // ネガティブマージンによる水平中央揃えの補正
         container.style.marginLeft = "-" + originalWidth / 2 + "px";
 
-        // スケール後の高さに合わせて親カードの表示領域を動的に確保
-        card.style.height = originalHeight * scale + 60 + "px";
+        // カードの高さを算出（下部に少し余白を追加）
+        card.style.height = originalHeight * scale + 20 + "px";
 
-        // Tableau側の描画不具合（白画面）防止のため、サイズと表示状態を明示的に指定
+        // 強制表示設定
         vizObj.style.display = "block";
         vizObj.style.width = originalWidth + "px";
         vizObj.style.height = originalHeight + "px";
 
-        // 内部に生成されるiframeに対してもサイズ整合性を強制
         var iframe = placeholder.getElementsByTagName("iframe")[0];
         if (iframe) {
           iframe.style.display = "block";
@@ -192,19 +184,15 @@
         }
       }
 
-      // ウィンドウリサイズ時に追従
       window.onresize = resizeTableau;
 
-      /**
-       * Tableau JS API のロードおよび初期化監視
-       */
       var scriptElement = document.createElement("script");
       scriptElement.src =
         "https://public.tableau.com/javascripts/api/viz_v1.js";
       scriptElement.onload = function () {
-        // 描画負荷を考慮し、初期ロードから数秒間ポーリング実行してレイアウトを確定させる
         resizeTableau();
-        [500, 1500, 3000, 5000].forEach(function (delay) {
+        // 描画完了を待って段階的に実行
+        [500, 1500, 3000].forEach(function (delay) {
           setTimeout(resizeTableau, delay);
         });
       };
