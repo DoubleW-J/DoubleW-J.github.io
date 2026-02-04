@@ -52,7 +52,7 @@
       }
 
       .main-content {
-        max-width: 1440px;
+        max-width: 1400px;
         margin: 30px auto;
         padding: 0 20px;
       }
@@ -71,16 +71,15 @@
         border-radius: 4px;
         font-size: 0.9rem;
       }
-
       .viz-card {
         background: var(--card-bg);
         border-radius: 12px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-        padding: 10px;
+        padding: 0px;
         overflow: hidden;
         display: flex;
         justify-content: center;
-        min-height: 600px;
+        position: relative;
       }
 
       /* Tableauコンテナの縮放基準点を設定 */
@@ -184,12 +183,13 @@
 
     <script type="text/javascript">
       /**
-       * Tableauダッシュボードのサイズをブラウザ幅に合わせて動的に調整する関数
+       * Tableauダッシュボードのサイズを調整する関数
        */
       function resizeTableau() {
-        // 親コンテナの幅を取得
-        var containerWidth =
-          document.querySelector(".viz-card").offsetWidth - 20;
+        // .viz-cardの幅を取得（左右のパディングを考慮）
+        var vizCard = document.querySelector(".viz-card");
+        var containerWidth = vizCard.offsetWidth - 40;
+
         var vizContainer = document.getElementById("vizContainer");
         var divElement = document.getElementById("viz1770204389511");
         var vizElement = divElement.getElementsByTagName("object")[0];
@@ -198,30 +198,35 @@
         var originalWidth = 1400;
         var originalHeight = 1627;
 
-        // スケーリング比率を計算（コンテナ幅に合わせて縮小）
+        // 【ここがポイント】
+        // 缩放比例：如果容器太窄，则进行缩小。
+        // 但如果容器足够宽，我们限制它不要缩得太小。
         var scale = containerWidth / originalWidth;
+
+        // 限制：在PC端如果scale算出来是0.5（太小），我们可以稍微调大一点
+        // 或者确保容器本身在CSS里足够宽
         if (scale > 1) scale = 1;
 
-        // CSS Transformで全体をスケーリング
+        // 全体をスケーリング
         vizContainer.style.transform = "scale(" + scale + ")";
 
-        // 親容器の高さを動的に調整（余白削除）
-        document.querySelector(".viz-card").style.height =
-          originalHeight * scale + 40 + "px";
+        // 【重要】スケーリング後の高さを親容器に反映
+        // これをしないと、下のフッターとの間に巨大な空白ができたり、中身が切れたりします
+        vizCard.style.height = originalHeight * scale + 60 + "px";
 
-        // ★ここを修正：Tableau側の幅を固定値ではなく100%に設定★
-        vizElement.style.width = "100%";
+        // Tableauオブジェクトのサイズ設定
+        vizElement.style.width = originalWidth + "px";
         vizElement.style.height = originalHeight + "px";
       }
 
-      // ウィンドウのリサイズ時に再計算
+      // ウィンドウのリサイズ時に実行
       window.onresize = resizeTableau;
 
-      // Tableauライブラリの読み込みと初期化
+      // 初期化
       var divElement = document.getElementById("viz1770204389511");
       var vizElement = divElement.getElementsByTagName("object")[0];
 
-      // 初期化時にもサイズ調整を実行
+      // 初回ロード時
       resizeTableau();
 
       var scriptElement = document.createElement("script");
