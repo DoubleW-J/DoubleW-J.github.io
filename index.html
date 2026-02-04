@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>永住申請予測ダッシュボード | Permanent Residency Forecast</title>
+    <link
+      rel="icon"
+      href="https://cdn-icons-png.flaticon.com/512/428/428032.png"
+    />
+    <style>
+      :root {
+        --primary-color: #2c3e50;
+        --accent-color: #3498db;
+        --bg-color: #f8f9fa;
+        --card-bg: #ffffff;
+      }
+
+      body {
+        font-family:
+          "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+          Meiryo, sans-serif;
+        margin: 0;
+        background-color: var(--bg-color);
+        color: var(--primary-color);
+        line-height: 1.6;
+      }
+
+      /* 上部グラデーションバー */
+      .top-bar {
+        height: 4px;
+        background: linear-gradient(to right, var(--accent-color), #2ecc71);
+      }
+
+      header {
+        background-color: var(--card-bg);
+        padding: 40px 20px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 2.2rem;
+        letter-spacing: 1px;
+      }
+
+      header p {
+        color: #7f8c8d;
+        margin-top: 10px;
+        font-weight: 300;
+      }
+
+      .main-content {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+      }
+
+      /* ダッシュボードカード */
+      .viz-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        overflow: hidden;
+        min-height: 600px;
+      }
+
+      /* 説明ボックス */
+      .description-box {
+        margin-bottom: 30px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+
+      .info-item {
+        background: #eef2f7;
+        padding: 15px 20px;
+        border-left: 4px solid var(--accent-color);
+        border-radius: 4px;
+        font-size: 0.9rem;
+      }
+
+      footer {
+        text-align: center;
+        padding: 40px 20px;
+        color: #95a5a6;
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 768px) {
+        header h1 {
+          font-size: 1.6rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-bar"></div>
+
+    <header>
+      <h1>Permanent Residency Forecast</h1>
+      <p>日本永住許可申請の動向予測・統計分析ポータル</p>
+    </header>
+
+    <div class="main-content">
+      <div class="description-box">
+        <div class="info-item">
+          <strong>📊 データソース：</strong>
+          日本政府統計（e-Stat）の「出入国管理統計」に基づき、最新の公開データを自動反映。
+        </div>
+        <div class="info-item">
+          <strong>🔍 分析対象：</strong>
+          全国および各地方出入国在留管理局別の受理・許可・未済（バックログ）状況を網羅。
+        </div>
+        <div class="info-item">
+          <strong>📈 予測シミュレーション：</strong>
+          パラメータ変更により、過去のトレンドに基づいた今後の申請動向を予測可能。
+        </div>
+      </div>
+
+      <div class="viz-card">
+        <div class="tableauPlaceholder" id="vizContainer"></div>
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        &copy; 2026 PR Forecast Project. Data synced via Tableau Public API.
+      </p>
+      <p>
+        出入国管理統計のオープンデータを活用し、ビジュアライゼーションを行っています。
+      </p>
+    </footer>
+  </body>
+</html>
