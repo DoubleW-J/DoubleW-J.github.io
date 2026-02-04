@@ -3,23 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>永住申請予測ダッシュボード | Permanent Residency Forecast</title>
-    <link
-      rel="icon"
-      href="https://cdn-icons-png.flaticon.com/512/428/428032.png"
-    />
+    <title>永住申請予測ダッシュボード</title>
     <style>
       :root {
-        --primary-color: #2c3e50;
-        --accent-color: #3498db;
         --bg-color: #f8f9fa;
         --card-bg: #ffffff;
+        --accent-color: #3498db;
       }
       body {
-        font-family: "Helvetica Neue", Arial, sans-serif;
+        font-family: sans-serif;
         margin: 0;
         background-color: var(--bg-color);
-        color: var(--primary-color);
         overflow-x: hidden;
       }
       .top-bar {
@@ -27,55 +21,36 @@
         background: linear-gradient(to right, var(--accent-color), #2ecc71);
       }
       header {
-        background-color: var(--card-bg);
-        padding: 40px 20px;
+        background: var(--card-bg);
+        padding: 30px;
         text-align: center;
         border-bottom: 1px solid #eee;
       }
 
       .main-content {
-        max-width: 1400px; /* 模板原始宽度 */
-        margin: 30px auto;
-        padding: 0 10px;
+        max-width: 1200px; /* 网页显示的最大宽度 */
+        margin: 20px auto;
+        padding: 0 15px;
       }
 
-      /* 核心修改：移除 flex，改为相对定位 */
+      /* 核心修复：这个容器负责切断溢出的 1400px 内容 */
       .viz-card {
         background: var(--card-bg);
         border-radius: 12px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
         position: relative;
         width: 100%;
-        overflow: visible; /* 允许缩放内容溢出显示 */
-        min-height: 500px;
+        overflow: hidden; /* 必须是 hidden，防止 1400px 撑开网页 */
+        height: 800px; /* 初始高度 */
       }
 
-      /* 缩放包装器：使用 absolute 配合 left 50% 实现完美居中 */
+      /* 缩放中心 */
       #vizContainer {
         position: absolute;
         left: 50%;
+        top: 0;
         transform-origin: top center;
-      }
-
-      footer {
-        text-align: center;
-        padding: 40px 20px;
-        color: #95a5a6;
-        font-size: 0.85rem;
-      }
-
-      .description-box {
-        margin-bottom: 30px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-      }
-      .info-item {
-        background: #eef2f7;
-        padding: 15px 20px;
-        border-left: 4px solid var(--accent-color);
-        border-radius: 4px;
-        font-size: 0.9rem;
+        width: 1400px; /* 强制锁定 Tableau 原始宽度 */
       }
     </style>
   </head>
@@ -83,22 +58,10 @@
     <div class="top-bar"></div>
     <header>
       <h1>Permanent Residency Forecast</h1>
-      <p>日本永住許可申請の動向予測・統計分析ポータル</p>
+      <p>日本永住許可申請の動向予測ポータル</p>
     </header>
 
     <div class="main-content">
-      <div class="description-box">
-        <div class="info-item">
-          <strong>📊 データソース：</strong>e-Stat「出入国管理統計」
-        </div>
-        <div class="info-item">
-          <strong>🔍 分析対象：</strong>全国および地方局別の受理・許可・未済状況
-        </div>
-        <div class="info-item">
-          <strong>📈 予測：</strong>トレンドに基づく今後の申請動向
-        </div>
-      </div>
-
       <div class="viz-card" id="cardParent">
         <div id="vizContainer">
           <div
@@ -116,8 +79,6 @@
                 value="SuperstoreDashboard-VizExtensionsEdition_VOTD_17702027410190&#47;viz"
               />
               <param name="toolbar" value="yes" />
-              <param name="animate_transition" value="yes" />
-              <param name="display_static_image" value="yes" />
               <param name="language" value="zh-CN" />
               <param name="filter" value="publish=yes" />
             </object>
@@ -126,10 +87,6 @@
       </div>
     </div>
 
-    <footer>
-      <p>&copy; 2026 PR Forecast Project.</p>
-    </footer>
-
     <script type="text/javascript">
       var originalWidth = 1400;
       var originalHeight = 1627;
@@ -137,34 +94,32 @@
       function resizeTableau() {
         var card = document.getElementById("cardParent");
         var container = document.getElementById("vizContainer");
-        var vizObj = container.getElementsByTagName("object")[0];
 
-        // 计算可用宽度
-        var availableWidth = card.offsetWidth;
-        var scale = availableWidth / originalWidth;
+        // 1. 获取当前卡片的实际宽度
+        var currentWidth = card.offsetWidth;
 
+        // 2. 计算缩放比例
+        var scale = currentWidth / originalWidth;
         if (scale > 1) scale = 1;
 
-        // 应用缩放和居中平移
-        container.style.width = originalWidth + "px";
+        // 3. 执行缩放和平移（translateX -50% 配合 left 50% 是居中神技）
         container.style.transform = "translateX(-50%) scale(" + scale + ")";
 
-        // 动态调整卡片高度
-        card.style.height = originalHeight * scale + 20 + "px";
-
-        vizObj.style.width = originalWidth + "px";
-        vizObj.style.height = originalHeight + "px";
+        // 4. 动态调整外层卡片高度，防止底部留白或切断
+        card.style.height = originalHeight * scale + "px";
       }
 
-      window.onresize = resizeTableau;
+      // 监听窗口大小变化
+      window.addEventListener("resize", resizeTableau);
 
-      // 初始化加载
+      // 加载 Tableau 脚本
       var scriptElement = document.createElement("script");
       scriptElement.src =
         "https://public.tableau.com/javascripts/api/viz_v1.js";
       scriptElement.onload = function () {
-        // 脚本加载后延迟一点点执行，确保DOM渲染完毕
-        setTimeout(resizeTableau, 500);
+        // 脚本加载后多触发几次，确保 Tableau 渲染后尺寸正确
+        setTimeout(resizeTableau, 100);
+        setTimeout(resizeTableau, 1000);
       };
       document.getElementById("viz1770204389511").appendChild(scriptElement);
     </script>
