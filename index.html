@@ -11,7 +11,7 @@
         --accent-color: #3498db;
       }
       body {
-        font-family: sans-serif;
+        font-family: "Helvetica Neue", Arial, sans-serif;
         margin: 0;
         background-color: var(--bg-color);
         overflow-x: hidden;
@@ -28,7 +28,7 @@
       }
 
       .main-content {
-        max-width: 1400px; /* 匹配看板原始宽度 */
+        max-width: 1400px;
         margin: 20px auto;
         padding: 0 10px;
       }
@@ -38,12 +38,11 @@
         border-radius: 12px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
         position: relative;
-        width: 100% !important; /* 强制锁定 */
-        overflow: hidden;
-        min-height: 400px;
+        width: 100% !important;
+        overflow: hidden; /* 这里必须是 hidden，防止内部 1600px 撑开页面 */
+        min-height: 600px; /* 初始最小高度，防止闪烁 */
       }
 
-      /* 强制覆盖 Tableau 内部生成的宽度 */
       #vizContainer {
         position: absolute;
         left: 50%;
@@ -52,7 +51,6 @@
         width: 1400px !important;
       }
 
-      /* 暴力解决：强制让内部所有对象不准撑开网页 */
       .tableauViz {
         width: 1400px !important;
       }
@@ -92,9 +90,13 @@
     </div>
 
     <script type="text/javascript">
+      // オリジナルサイズ設定（縦幅に少し余裕を持たせる）
       var originalWidth = 1400;
-      var originalHeight = 1627;
+      var originalHeight = 1750; // 拡張プラグインの描画領域を考慮して少し大きく設定
 
+      /**
+       * ダッシュボードのサイズを動的に調整する
+       */
       function doResize() {
         var card = document.getElementById("cardParent");
         var container = document.getElementById("vizContainer");
@@ -104,26 +106,24 @@
         var scale = currentWidth / originalWidth;
         if (scale > 1) scale = 1;
 
-        // 应用缩放和平移
+        // スケーリングと中央配置
         container.style.transform = "translateX(-50%) scale(" + scale + ")";
 
-        // 动态设置卡片高度
-        card.style.height = originalHeight * scale + "px";
+        // カードの高さを計算（スケール後の縦幅 + 下部のバッファ）
+        var adjustedHeight = originalHeight * scale + 20;
+        card.style.setProperty("height", adjustedHeight + "px", "important");
       }
 
-      // 核心改动：不仅在加载和调整大小时执行，还要在 Tableau 加载期间“巡逻”
       window.addEventListener("resize", doResize);
 
-      // 多次触发，对抗 Tableau 的内部样式重置
       window.onload = function () {
         doResize();
-        // 分别在 0.5秒、1.5秒、3秒后再次强制检查尺寸
-        [500, 1500, 3000].forEach((delay) => {
+        // Tableauの描画遅延（特にViz Extensions）に対応するため、実行間隔を調整
+        [500, 1500, 3000, 5000].forEach(function (delay) {
           setTimeout(doResize, delay);
         });
       };
 
-      // 加载脚本
       var vizDiv = document.getElementById("viz1770204389511");
       var scriptElement = document.createElement("script");
       scriptElement.src =
