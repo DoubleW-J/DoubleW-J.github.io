@@ -23,7 +23,7 @@
         background-color: var(--bg-color);
         color: var(--primary-color);
         line-height: 1.6;
-        overflow-x: hidden; /* 横スクロールを完全に防止 */
+        overflow-x: hidden;
       }
 
       .top-bar {
@@ -50,7 +50,7 @@
       }
 
       .main-content {
-        max-width: 1400px; /* ダッシュボードの元サイズに合わせる */
+        max-width: 1440px;
         margin: 30px auto;
         padding: 0 15px;
       }
@@ -70,23 +70,25 @@
         font-size: 0.9rem;
       }
 
-      /* ダッシュボードを収めるカード：幅の切り取りを防止 */
+      /* ダッシュボードを収めるカード：中央揃えを強制 */
       .viz-card {
         background: var(--card-bg);
         border-radius: 12px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
         padding: 0;
-        overflow: hidden; /* スケールされた要素の余分な領域を隠す */
+        overflow: hidden;
         position: relative;
         width: 100%;
-        display: block; /* Flexを避け、計算の安定性を確保 */
+        display: flex; /* 中央揃えのためにFlexboxを使用 */
+        justify-content: center;
+        min-height: 500px;
       }
 
-      /* スケーリング用コンテナ：中央基準で縮小 */
+      /* スケーリング用コンテナ */
       #vizContainer {
-        width: 1400px; /* オリジナル幅を強制 */
-        margin: 0 auto;
-        transform-origin: top center; /* 中央上部を軸に縮小 */
+        width: 1400px; /* ダッシュボードの元サイズを維持 */
+        flex-shrink: 0; /* Flexboxによる圧縮を防止 */
+        transform-origin: top center; /* 中央上部を基準にスケーリング */
         position: relative;
       }
 
@@ -157,12 +159,12 @@
     </footer>
 
     <script type="text/javascript">
-      // ダッシュボードのオリジナルサイズ（拡張機能を考慮し縦幅を微調整）
+      // ダッシュボードの元サイズ定義（Viz Extensionsの描画領域を考慮して縦幅を調整）
       var originalWidth = 1400;
       var originalHeight = 1750;
 
       /**
-       * Tableauのサイズとスケーリングを計算・適用する関数
+       * ダッシュボードのサイズとスケールを動的に計算・適用するメイン関数
        */
       function resizeTableau() {
         var card = document.getElementById("cardParent");
@@ -171,35 +173,35 @@
 
         if (!card || !container || !vizObj) return;
 
-        // 1. 親要素（カード）の幅を取得
+        // 1. 親コンテナの現在の幅を取得（パディング等を考慮）
         var currentWidth = card.offsetWidth;
 
-        // 2. スケール比率を計算（最大1.0）
+        // 2. スケーリング比率を計算（1.0倍を超えないように設定）
         var scale = currentWidth / originalWidth;
         if (scale > 1) scale = 1;
 
-        // 3. スケーリングを適用（transform-origin: top center により中央維持）
+        // 3. CSS Transformを使用して全体をスケーリング（transform-originに従い中央維持）
         container.style.transform = "scale(" + scale + ")";
 
-        // 4. カードの高さをスケーリング後の高さに合わせる（重要：これで縦の切れを防止）
+        // 4. スケール後の高さに合わせてカードコンテナの高さを調整（縦方向の切れを防止）
         card.style.height = originalHeight * scale + 20 + "px";
 
-        // 5. Tableau内部オブジェクトにサイズを強制
+        // 5. Tableau内部オブジェクトにオリジナルのピクセルサイズを強制適用
         vizObj.style.width = originalWidth + "px";
         vizObj.style.height = originalHeight + "px";
       }
 
-      // ウィンドウサイズ変更時に再計算を実行
+      // ウィンドウのリサイズイベントにリサイズ処理を登録
       window.onresize = resizeTableau;
 
       /**
-       * Tableau JS APIの読み込みと実行
+       * Tableau JS APIの読み込み完了後に実行される初期化処理
        */
       var scriptElement = document.createElement("script");
       scriptElement.src =
         "https://public.tableau.com/javascripts/api/viz_v1.js";
       scriptElement.onload = function () {
-        // Tableauの読み込み遅延やViz Extensionsの描画に合わせて段階的にリサイズを実行
+        // Tableauのレンダリング遅延に対応するため、段階的にリサイズを実行（ポーリング処理）
         resizeTableau();
         [500, 1500, 3000, 5000].forEach(function (delay) {
           setTimeout(resizeTableau, delay);
