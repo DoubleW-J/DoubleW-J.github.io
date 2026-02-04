@@ -24,9 +24,9 @@
         background-color: var(--bg-color);
         color: var(--primary-color);
         line-height: 1.6;
+        overflow-x: hidden; /* スケール調整による横スクロールを防止 */
       }
 
-      /* 上部グラデーションバー */
       .top-bar {
         height: 4px;
         background: linear-gradient(to right, var(--accent-color), #2ecc71);
@@ -52,22 +52,11 @@
       }
 
       .main-content {
-        max-width: 1200px;
+        max-width: 1440px;
         margin: 30px auto;
         padding: 0 20px;
       }
 
-      /* ダッシュボードカード */
-      .viz-card {
-        background: var(--card-bg);
-        border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-        padding: 20px;
-        overflow: hidden;
-        min-height: 600px;
-      }
-
-      /* 説明ボックス */
       .description-box {
         margin-bottom: 30px;
         display: grid;
@@ -81,6 +70,23 @@
         border-left: 4px solid var(--accent-color);
         border-radius: 4px;
         font-size: 0.9rem;
+      }
+
+      .viz-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+        padding: 10px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        min-height: 600px;
+      }
+
+      /* Tableauコンテナの縮放基準点を設定 */
+      #vizContainer {
+        transform-origin: top center;
+        transition: transform 0.3s ease;
       }
 
       footer {
@@ -128,13 +134,16 @@
             id="viz1770204389511"
             style="position: relative"
           >
-            <noscript
-              ><a href="#"
-                ><img
-                  alt="Designed by Pradeep Kumar GViz extensions powered by Ladataviz.com "
-                  src="https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Su&#47;SuperstoreDashboard-VizExtensionsEdition_VOTD_17702027410190&#47;viz&#47;1_rss.png"
-                  style="border: none" /></a></noscript
-            ><object class="tableauViz" style="display: none">
+            <noscript>
+              <a href="#">
+                <img
+                  alt="Designed by Pradeep Kumar"
+                  src="https://public.tableau.com/static/images/Su/SuperstoreDashboard-VizExtensionsEdition_VOTD_17702027410190/viz/1_rss.png"
+                  style="border: none"
+                />
+              </a>
+            </noscript>
+            <object class="tableauViz" style="display: none">
               <param
                 name="host_url"
                 value="https%3A%2F%2Fpublic.tableau.com%2F"
@@ -149,7 +158,7 @@
               <param name="toolbar" value="yes" />
               <param
                 name="static_image"
-                value="https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Su&#47;SuperstoreDashboard-VizExtensionsEdition_VOTD_17702027410190&#47;viz&#47;1.png"
+                value="https://public.tableau.com/static/images/Su/SuperstoreDashboard-VizExtensionsEdition_VOTD_17702027410190/viz/1.png"
               />
               <param name="animate_transition" value="yes" />
               <param name="display_static_image" value="yes" />
@@ -160,16 +169,6 @@
               <param name="filter" value="publish=yes" />
             </object>
           </div>
-          <script type="text/javascript">
-            var divElement = document.getElementById("viz1770204389511");
-            var vizElement = divElement.getElementsByTagName("object")[0];
-            vizElement.style.width = "1400px";
-            vizElement.style.height = "1627px";
-            var scriptElement = document.createElement("script");
-            scriptElement.src =
-              "https://public.tableau.com/javascripts/api/viz_v1.js";
-            vizElement.parentNode.insertBefore(scriptElement, vizElement);
-          </script>
         </div>
       </div>
     </div>
@@ -182,5 +181,52 @@
         出入国管理統計のオープンデータを活用し、ビジュアライゼーションを行っています。
       </p>
     </footer>
+
+    <script type="text/javascript">
+      /**
+       * Tableauダッシュボードのサイズをブラウザ幅に合わせて動的に調整する関数
+       */
+      function resizeTableau() {
+        // 親コンテナの幅を取得（パディング分を差し引く）
+        var containerWidth =
+          document.querySelector(".viz-card").offsetWidth - 20;
+        var vizContainer = document.getElementById("vizContainer");
+        var divElement = document.getElementById("viz1770204389511");
+        var vizElement = divElement.getElementsByTagName("object")[0];
+
+        // テンプレートのオリジナルサイズ（1400x1627）
+        var originalWidth = 1400;
+        var originalHeight = 1627;
+
+        // 現在の幅に基づいたスケーリング比率を計算
+        var scale = containerWidth / originalWidth;
+
+        // 1倍（等倍）を超えないように制限（拡大によるボケ防止）
+        if (scale > 1) scale = 1;
+
+        // CSS Transformを使用してダッシュボード全体を等倍スケーリング
+        vizContainer.style.transform = "scale(" + scale + ")";
+
+        // スケーリング後の高さを計算し、親要素の高さに反映（下部の空白を削除）
+        document.querySelector(".viz-card").style.height =
+          originalHeight * scale + 40 + "px";
+
+        // Tableauオブジェクト自体のピクセルサイズを固定値として設定
+        vizElement.style.width = originalWidth + "px";
+        vizElement.style.height = originalHeight + "px";
+      }
+
+      // 初回ロード時およびウィンドウのリサイズ時に実行
+      window.onload = resizeTableau;
+      window.onresize = resizeTableau;
+
+      // Tableauライブラリの読み込み
+      var divElement = document.getElementById("viz1770204389511");
+      var vizElement = divElement.getElementsByTagName("object")[0];
+      var scriptElement = document.createElement("script");
+      scriptElement.src =
+        "https://public.tableau.com/javascripts/api/viz_v1.js";
+      vizElement.parentNode.insertBefore(scriptElement, vizElement);
+    </script>
   </body>
 </html>
