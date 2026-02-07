@@ -11,7 +11,7 @@
 </details>
 
 ## データフロー
-<img src="./images/data_flow.png" width="100%">
+<img src="./images/data_flow.png" width="40%">
 
 ## 特徴
 - **リアルタイム性**: Tableau Public 経由で e-Stat の最新データを反映
